@@ -14,5 +14,5 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Build the Docker image
-      run: docker build debezium-jdbc-es --file Dockerfile --tag my-image-name:$(date +%s)
+    - name: Build the Kafka Connect-JDBC-Elasticsearch image
+      run: cd debezium-jdbc-es && docker build . --tag your_registry_namespace/connect-jdbc-es:$(date +%s)
