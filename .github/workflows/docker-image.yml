@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build debezium-jdbs-es --file Dockerfile --tag my-image-name:$(date +%s)
+      run: docker build debezium-jdbc-es --file Dockerfile --tag my-image-name:$(date +%s)
