@@ -134,17 +134,54 @@ yellow open customers        awIg9xdDRpSqGa0hIYWVuQ 1 1  0 0   227b   227b
 
 Search customers:
 ```
-curl -s http://localhost:9200/customers/_search
+curl -s http://localhost:9200/customers/_search | jq .
 ```
 ```
-{"took":4,"timed_out":false,"_shards":{"total":1,"successful":1,"skipped":0,"failed":0},"hits":{"total":{"value":4,"relation":"eq"},"max_score":1.0,"hits":[{"_index":"customers","_type":"customer","_id":"1002","_score":1.0,"_source":{"id":1002,"first_name":"George","last_name":"Bailey","email":"gbailey@foobar.com"}},{"_index":"customers","_type":"customer","_id":"1001","_score":1.0,"_source":{"id":1001,"first_name":"Sally","last_name":"Thomas","email":"sally.thomas@acme.com"}},{"_index":"customers","_type":"customer","_id":"1003","_score":1.0,"_source":{"id":1003,"first_name":"Edward","last_name":"Walker","email":"ed@walker.com"}},{"_index":"customers","_type":"customer","_id":"1004","_score":1.0,"_source":{"id":1004,"first_name":"Anne","last_name":"Kretchmar","email":"annek@noanswer.org"}}]}}
+{
+  "took": 6,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 4,
+      "relation": "eq"
+    },
+    "max_score": 1,
+    "hits": [
+      {
+        "_index": "customers",
+        "_type": "customer",
+        "_id": "1002",
+        "_score": 1,
+        "_source": {
+          "id": 1002,
+...
 ```
 Get a specific customer:
 ```
-curl -s http://localhost:9200/customers/customer/1004
+curl -s http://localhost:9200/customers/customer/1004 | jq .
 ```
 ```
-{"_index":"customers","_type":"customer","_id":"1004","_version":3,"_seq_no":3,"_primary_term":1,"found":true,"_source":{"id":1004,"first_name":"Anne","last_name":"Kretchmar","email":"annek@noanswer.org"}}
+{
+  "_index": "customers",
+  "_type": "customer",
+  "_id": "1004",
+  "_version": 3,
+  "_seq_no": 3,
+  "_primary_term": 1,
+  "found": true,
+  "_source": {
+    "id": 1004,
+    "first_name": "Anne",
+    "last_name": "Kretchmar",
+    "email": "annek@noanswer.org"
+  }
+}
 ```
 
 ## MySQL Testing
@@ -166,4 +203,14 @@ DELETE FROM customers WHERE id=1004;
 ```
 ```
 INSERT INTO customers VALUES (default, "Sarah", "Thompson", "kitt@acme.com");
+```
+
+## Elasticsearch Connector Validation
+```
+curl -s http://localhost:9200/customers/customer/1004 | jq .
+```
+```
+...
+    "first_name": "Anne Marie",
+...
 ```
