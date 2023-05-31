@@ -1,13 +1,19 @@
 # Debezium Stack
 Docker Compose example based on the official tutorial [here](https://debezium.io/documentation/reference/stable/tutorial.html).
 
+This stack was tested on Mac OS Monterey on Apple M1 Max hardware.
+
+## Prerequisites
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
 ## Connect Container Image Build
+Build the custom Kafka Connect container image:
 ```
 cd debezium-jdbc-es &&\
 docker build --build-arg DEBEZIUM_VERSION=2.2 -t your_registry_namespace/connect-jdbc-es:2.2 .
 ```
 
-## Docker Compose UP
+## Launch Stack
 ```
 docker-compose up -d
 ```
@@ -22,8 +28,9 @@ docker-compose up -d
  ```
 
 ## View Logs
+Tail the `connect` container logs in a separate terminal. Review these logs when creating connectors in the subsequent POST commands below.
 ```
-docker compose logs connect
+docker compose logs connect -f
 ```
 ```
 debezium-connect-1  | Using BOOTSTRAP_SERVERS=kafka:9092
@@ -34,6 +41,7 @@ debezium-connect-1  |       GROUP_ID=1
 ```
 
 ## Check Elasticsearch
+Confirm Elasticsearch is running on the default port:
 ```
 curl  http://localhost:9200
 ```
@@ -64,7 +72,8 @@ curl  http://localhost:9200/_cat/indices
 green open .geoip_databases L-njLsExSLaaZq_D7qe3bg 1 0 42 0 40.8mb 40.8mb
 ```
 
-## Lauch MySQL CLI
+## Launch MySQL CLI
+Launch the MySQL CLI:
 ```
 docker compose exec -it mysql mysql -uroot -pdebezium inventory
 ```
@@ -77,6 +86,7 @@ Bye
 ```
 
 ## Create Elasticsearch Sink Connector
+Create the Elasticsearch sink connector using curl:
 ```
 curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @es-sink.json
 ```
@@ -91,7 +101,7 @@ Server: Jetty(9.4.48.v20220622)
 {"name":"elastic-sink","config":{"connector.class":"io.confluent.connect.elasticsearch.ElasticsearchSinkConnector","tasks.max":"1","topics":"customers","connection.url":"http://elastic:9200","transforms":"unwrap,key","transforms.unwrap.type":"io.debezium.transforms.ExtractNewRecordState","transforms.unwrap.drop.tombstones":"false","transforms.key.type":"org.apache.kafka.connect.transforms.ExtractField$Key","transforms.key.field":"id","key.ignore":"false","type.name":"customer","behavior.on.null.values":"delete","name":"elastic-sink"},"tasks":[],"type":"sink"}
 ```
 
-Confirm:
+Confirm the connector was created:
 ```
 curl -H "Accept:application/json" localhost:8083/connectors/
 ```
@@ -100,6 +110,7 @@ curl -H "Accept:application/json" localhost:8083/connectors/
 ```
 
 ## Create MySQL Source
+Create the MySQL source connector:
 ```
 curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @source.json
 ```
@@ -114,7 +125,7 @@ Server: Jetty(9.4.48.v20220622)
 
 {"name":"inventory-connector","config":{"connector.class":"io.debezium.connector.mysql.MySqlConnector","tasks.max":"1","topic.prefix":"dbserver1","database.hostname":"mysql","database.port":"3306","database.user":"debezium","database.password":"dbz","database.server.id":"184054","database.include.list":"inventory","schema.history.internal.kafka.bootstrap.servers":"kafka:9092","schema.history.internal.kafka.topic":"schema-changes.inventory","transforms":"route","transforms.route.type":"org.apache.kafka.connect.transforms.RegexRouter","transforms.route.regex":"([^.]+)\\.([^.]+)\\.([^.]+)","transforms.route.replacement":"$3","name":"inventory-connector"},"tasks":[],"type":"source"}
 ```
-Confirm:
+Confirm the connector was created:
 ```
 curl -H "Accept:application/json" localhost:8083/connectors/
 ```
@@ -122,8 +133,13 @@ curl -H "Accept:application/json" localhost:8083/connectors/
 ["elastic-sink","inventory-connector"]
 ```
 
-## Elasticsearch Testing
-Check indices:
+
+## Testing
+Explore the following examples to validate the Connect functionality.
+
+
+### Elasticsearch
+Check indices. (You should now see a `customers` index.):
 ```
 curl  http://localhost:9200/_cat/indices
 ```
@@ -132,7 +148,7 @@ green  open .geoip_databases L-njLsExSLaaZq_D7qe3bg 1 0 42 0 40.8mb 40.8mb
 yellow open customers        awIg9xdDRpSqGa0hIYWVuQ 1 1  0 0   227b   227b
 ```
 
-Search customers:
+Search the customers index:
 ```
 curl -s http://localhost:9200/customers/_search | jq .
 ```
@@ -184,7 +200,7 @@ curl -s http://localhost:9200/customers/customer/1004 | jq .
 }
 ```
 
-## MySQL Testing
+### MySQL CLI
 ```
 use inventory;
 ```
@@ -205,7 +221,8 @@ DELETE FROM customers WHERE id=1004;
 INSERT INTO customers VALUES (default, "Sarah", "Thompson", "kitt@acme.com");
 ```
 
-## Elasticsearch Connector Validation
+### Elasticsearch
+Confirm MySQL CLI update:
 ```
 curl -s http://localhost:9200/customers/customer/1004 | jq .
 ```
@@ -213,4 +230,9 @@ curl -s http://localhost:9200/customers/customer/1004 | jq .
 ...
     "first_name": "Anne Marie",
 ...
+```
+
+## Destroy Stack
+```
+docker compose down
 ```
