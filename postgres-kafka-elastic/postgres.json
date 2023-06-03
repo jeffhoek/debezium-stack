@@ -1,0 +1,13 @@
+{
+  "name": "inventory-connector-postgres",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "postgresuser",
+    "database.password": "postgrespw",
+    "database.dbname" : "inventory",
+    "table.include.list": "public.people",
+    "topic.prefix": "pg"
+  }
+}
