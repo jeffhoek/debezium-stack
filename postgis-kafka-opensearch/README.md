@@ -120,7 +120,8 @@ Confirm the connector was created:
 curl -H "Accept:application/json" localhost:8083/connectors/
 ```
 ```
-["opensearch-connector"]```
+["opensearch-connector"]
+```
 
 
 ## Create Postgres Source Connector
