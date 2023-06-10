@@ -130,7 +130,22 @@ curl -H "Accept:application/json" localhost:8083/connectors/
 curl -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @postgres.json
 ```
 ```
-{"name":"inventory-connector-postgres","config":{"connector.class":"io.debezium.connector.postgresql.PostgresConnector","database.hostname":"postgres","database.port":"5432","database.user":"postgresuser","database.password":"postgrespw","database.dbname":"inventory","table.include.list":"public.customers,public.cities","topic.prefix":"pg","name":"inventory-connector-postgres"},"tasks":[],"type":"source"}
+{
+  "name": "inventory-connector-postgres",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "postgresuser",
+    "database.password": "postgrespw",
+    "database.dbname": "inventory",
+    "table.include.list": "public.customers,public.cities,public.uscities",
+    "topic.prefix": "pg",
+    "name": "inventory-connector-postgres"
+  },
+  "tasks": [],
+  "type": "source"
+}
 ```
 
 Confirm the connector was created:
