@@ -30,6 +30,9 @@ services:
      - POSTGRES_USER=postgresuser
      - POSTGRES_PASSWORD=postgrespw
      - POSTGRES_DB=inventory
+    volumes:
+      - ./postgis/gisdata:/gisdata
+      - ./pgdata:/var/lib/postgresql/data
 
   opensearch-node1:
     image: opensearchproject/opensearch:latest
