@@ -86,8 +86,10 @@ du -sh postgis/gisdata && du -sh pgdata
 ### Testing
 See https://postgis.net/docs/Geocode.html for more examples.
 
-```SELECT g.rating, ST_AsText(ST_SnapToGrid(g.geomout,0.00001)) As wktlonlat,
+```
+SELECT g.rating, ST_AsText(ST_SnapToGrid(g.geomout,0.00001)) As wktlonlat,
 (addy).address As stno, (addy).streetname As street,
 (addy).streettypeabbrev As styp, (addy).location As city, (addy).stateabbrev As st,(addy).zip
-FROM geocode('424 3rd St, Bedford, MA',1) As g;```
+FROM geocode('424 3rd St, Bedford, MA',1) As g;
+```
 

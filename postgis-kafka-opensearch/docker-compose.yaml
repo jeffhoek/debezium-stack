@@ -22,7 +22,9 @@ services:
       - zookeeper
 
   postgres:
-    image: your_registry_namespace/postgis:15-master-decoderbufs
+    build:
+        context: ./containers/postgis
+    # image: your_registry_namespace/postgis:15-master-decoderbufs
     # image: quay.io/debezium/postgres:11-alpine
     ports:
      - "5432:5432"
@@ -70,11 +72,11 @@ services:
       DISABLE_SECURITY_DASHBOARDS_PLUGIN: true
 
   connect:
-    image: jeffhoek/connect-jdbc-es-opensearch:2.2
     build:
-      context: debezium-jdbc-es
+      context: ./containers/connect
       args:
         DEBEZIUM_VERSION: 2.2
+    # image: jeffhoek/connect-jdbc-es-opensearch:2.2
     ports:
      - 8083:8083
      - 5005:5005
