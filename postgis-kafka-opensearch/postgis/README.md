@@ -65,7 +65,7 @@ for population statistics (optional)
 UPDATE tiger.loader_lookuptables SET load = true WHERE load = false AND lookup_name IN('tract', 'bg', 'tabblock');
 ```
 
-Generate script for loading MS:
+Generate state load script for Massachusetts (MA):
 ```
 psql -U postgresuser -c "SELECT Loader_Generate_Script(ARRAY['MA'], 'debbie')" -d inventory -tA > /gisdata/ma_load.sh
 ```
