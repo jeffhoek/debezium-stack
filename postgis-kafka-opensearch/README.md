@@ -170,6 +170,9 @@ curl -H "Accept:application/json" localhost:8083/connectors/
 ["inventory-connector-postgres","opensearch-connector"]
 ```
 
+## Install PostGIS Geocoder
+Follow the [README](./postgis/).
+
 ## Postgis / PSQL CLI
 ```
 CREATE TABLE cities (id int GENERATED ALWAYS AS IDENTITY PRIMARY KEY, name text, geom geometry);
