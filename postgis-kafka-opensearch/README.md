@@ -10,7 +10,7 @@ This stack was tested on Mac OS Monterey on Apple M1 Max hardware.
 Build the custom Kafka Connect container image:
 ```
 cd docker &&\
-docker build --build-arg DEBEZIUM_VERSION=2.2 -t your_registry_namespace/connect-jdbc-es:2.2 .
+docker build --build-arg DEBEZIUM_VERSION=2.2 -t your_registry_namespace/connect-jdbc-opensearch:2.2 .
 ```
 
 ## Postgis Container Image Build
