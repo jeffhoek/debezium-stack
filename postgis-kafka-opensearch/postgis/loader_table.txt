@@ -9,4 +9,3 @@ export PGPASSWORD=postgrespw
 export PGDATABASE=inventory
 PSQL=${PGBIN}/psql
 SHP2PGSQL=shp2pgsql
-cd /gisdata
