@@ -6,22 +6,6 @@ This stack was tested on Mac OS Monterey on Apple M1 Max hardware.
 ## Prerequisites
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
-## Connect Container Image Build
-```
-git clone https://github.com/debezium/container-images.git
-cd container-images/postgres/15-alpine
-```
-
-Change first line to:
-```
-FROM postgis/postgis:15-3.3-alpine
-```
-
-Build:
-```
-docker build -t your_registry_namespace/postgis:15-master-decoderbufs .
-```
-
 
 ## Launch Stack
 ```
@@ -130,7 +114,22 @@ curl -H "Accept:application/json" localhost:8083/connectors/
 curl -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @postgres.json
 ```
 ```
-{"name":"inventory-connector-postgres","config":{"connector.class":"io.debezium.connector.postgresql.PostgresConnector","database.hostname":"postgres","database.port":"5432","database.user":"postgresuser","database.password":"postgrespw","database.dbname":"inventory","table.include.list":"public.customers,public.cities","topic.prefix":"pg","name":"inventory-connector-postgres"},"tasks":[],"type":"source"}
+{
+  "name": "inventory-connector-postgres",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "postgresuser",
+    "database.password": "postgrespw",
+    "database.dbname": "inventory",
+    "table.include.list": "public.customers,public.cities,public.uscities",
+    "topic.prefix": "pg",
+    "name": "inventory-connector-postgres"
+  },
+  "tasks": [],
+  "type": "source"
+}
 ```
 
 Confirm the connector was created:
@@ -140,6 +139,9 @@ curl -H "Accept:application/json" localhost:8083/connectors/
 ```
 ["inventory-connector-postgres","opensearch-connector"]
 ```
+
+## Install PostGIS Geocoder
+Follow the [README](./postgis/).
 
 ## Postgis / PSQL CLI
 ```

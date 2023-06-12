@@ -1,0 +1,11 @@
+TMPDIR="/gisdata/temp/"
+UNZIPTOOL=/usr/bin/unzip
+WGETTOOL="/usr/bin/wget"
+export PGBIN=/usr/lib/postgresql/15/bin
+export PGPORT=5432
+export PGHOST=localhost
+export PGUSER=postgresuser
+export PGPASSWORD=postgrespw
+export PGDATABASE=inventory
+PSQL=${PGBIN}/psql
+SHP2PGSQL=shp2pgsql
