@@ -36,6 +36,18 @@ debezium-connect-1  |       GROUP_ID=1
 ...
 ```
 
+## Connect
+Check the plug-ins:
+```bash
+curl http://localhost:8083/connector-plugins | jq .
+```
+You should see e.g.
+```
+...
+"class": "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector",
+...
+```
+
 ## Kafka Topics
 Launch bash terminal in kafka container:
 ```
