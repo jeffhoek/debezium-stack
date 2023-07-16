@@ -23,6 +23,8 @@ services:
 
   mongodb:
     image: debezium/example-mongodb
+    ports:
+      - 27017:27017
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
@@ -36,8 +38,16 @@ services:
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: root
       ME_CONFIG_MONGODB_ADMINPASSWORD: example
-      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongodb:27017/
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongodb:27017/?replicaSet=rs0
 
+  postgres:
+    image: quay.io/debezium/postgres:11-alpine
+    ports:
+     - "5432:5432"
+    environment:
+     - POSTGRES_USER=postgresuser
+     - POSTGRES_PASSWORD=postgrespw
+     - POSTGRES_DB=inventory
 
   opensearch-node1:
     image: opensearchproject/opensearch:latest
@@ -79,13 +89,13 @@ services:
       context: ./containers/connect
       args:
         DEBEZIUM_VERSION: 2.3
-    # image: jeffhoek/connect-jdbc-es-opensearch:2.2
     ports:
      - 8083:8083
      - 5005:5005
     links:
      - kafka
      - mongodb
+     - postgres
      - opensearch-node1
     environment:
      - BOOTSTRAP_SERVERS=kafka:9092
