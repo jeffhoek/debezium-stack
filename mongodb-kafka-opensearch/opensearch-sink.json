@@ -3,16 +3,17 @@
     "config": {
         "name":"opensearch-connector",
         "connector.class": "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector",
-        "topics": "pg.public.cities",
+        "topics": "mongodb.inventory.cities",
         "connection.url": "http://opensearch-node1:9200",
+        "type.name": "city",
+        "tasks.max":"1",
+        "key.ignore": "false",
+        "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+        "behavior.on.null.values": "delete",
         "transforms": "unwrap,key",
         "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
         "transforms.unwrap.drop.tombstones": "false",
         "transforms.key.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
-        "transforms.key.field": "id",
-        "type.name": "city",
-        "tasks.max":"1",
-        "key.ignore": "false",
-        "behavior.on.null.values": "delete"
+        "transforms.key.field": "_id[\"$oid\"]"
     }
 }

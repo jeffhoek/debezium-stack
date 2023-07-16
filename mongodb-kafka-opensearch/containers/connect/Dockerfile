@@ -2,12 +2,14 @@ ARG DEBEZIUM_VERSION
 FROM quay.io/debezium/connect:${DEBEZIUM_VERSION}
 ENV KAFKA_CONNECT_JDBC_DIR=$KAFKA_CONNECT_PLUGINS_DIR/kafka-connect-jdbc \
     KAFKA_CONNECT_ES_DIR=$KAFKA_CONNECT_PLUGINS_DIR/kafka-connect-elasticsearch \
-    KAFKA_CONNECT_OS_DIR=$KAFKA_CONNECT_PLUGINS_DIR/kafka-connect-opensearch
+    KAFKA_CONNECT_OS_DIR=$KAFKA_CONNECT_PLUGINS_DIR/kafka-connect-opensearch \
+    KAFKA_CONNECT_MONGODB_DIR=$KAFKA_CONNECT_PLUGINS_DIR/kafka-connect-mongodb
 
 ARG POSTGRES_VERSION=42.5.1
 ARG KAFKA_JDBC_VERSION=5.3.2
 ARG KAFKA_ELASTICSEARCH_VERSION=5.3.2
 ARG OPENSEARCH_VERSION=3.0.0
+ARG MONGODB_VERSION=2.3.0
 
 # Deploy PostgreSQL JDBC Driver
 RUN cd /kafka/libs && curl -sO https://jdbc.postgresql.org/download/postgresql-$POSTGRES_VERSION.jar
@@ -15,6 +17,11 @@ RUN cd /kafka/libs && curl -sO https://jdbc.postgresql.org/download/postgresql-$
 # Deploy Kafka Connect JDBC
 RUN mkdir $KAFKA_CONNECT_JDBC_DIR && cd $KAFKA_CONNECT_JDBC_DIR &&\
 	curl -sO https://packages.confluent.io/maven/io/confluent/kafka-connect-jdbc/$KAFKA_JDBC_VERSION/kafka-connect-jdbc-$KAFKA_JDBC_VERSION.jar
+
+# MongoDB
+RUN mkdir $KAFKA_CONNECT_MONGODB_DIR && cd $KAFKA_CONNECT_MONGODB_DIR &&\
+    curl -sO https://repo1.maven.org/maven2/io/debezium/debezium-connector-mongodb/$MONGODB_VERSION.Final/debezium-connector-mongodb-$MONGODB_VERSION.Final-plugin.tar.gz &&\
+    tar xvf debezium-connector-mongodb-$MONGODB_VERSION.Final-plugin.tar.gz
 
 # Deploy OpenSearch sink connector
 RUN mkdir $KAFKA_CONNECT_OS_DIR && cd $KAFKA_CONNECT_OS_DIR &&\
