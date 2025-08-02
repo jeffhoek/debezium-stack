@@ -10,7 +10,7 @@ This stack was tested on Mac OS Monterey on Apple M1 Max hardware.
 Build the custom Kafka Connect container image:
 ```
 cd docker &&\
-docker build --build-arg DEBEZIUM_VERSION=2.2 -t your_registry_namespace/connect-jdbc-es:2.2 .
+docker build --build-arg DEBEZIUM_VERSION=2.7 -t your_registry_namespace/connect-jdbc-es:2.7 --load .
 ```
 
 ## Launch Stack
@@ -30,7 +30,7 @@ docker-compose up -d
 ## View Logs
 Tail the `connect` container logs in a separate terminal. Review these logs when creating connectors in the subsequent POST commands below.
 ```
-docker compose logs connect -f
+docker-compose logs connect -f
 ```
 ```
 debezium-connect-1  | Using BOOTSTRAP_SERVERS=kafka:9092
@@ -43,7 +43,7 @@ debezium-connect-1  |       GROUP_ID=1
 ## Kafka Topics
 Launch bash terminal in kafka container:
 ```
-docker compose exec -it kafka bash
+docker-compose exec -it kafka bash
 ```
 
 List topics:
@@ -53,7 +53,7 @@ bin/kafka-topics.sh --list --bootstrap-server=kafka:9092
 
 Consume a topic:
 ```
-bin/kafka-console-consumer.sh --bootstrap-server=kafka:9092 --topic=pg.public.customers --from-beginning
+bin/kafka-console-consumer.sh --bootstrap-server=kafka:9092 --topic=customers --from-beginning
 ```
 
 
@@ -96,7 +96,7 @@ green open .geoip_databases L-njLsExSLaaZq_D7qe3bg 1 0 42 0 40.8mb 40.8mb
 ## Launch MySQL CLI
 Launch the MySQL CLI:
 ```
-docker compose exec -it mysql mysql -uroot -pdebezium inventory
+docker-compose exec -it mysql mysql -uroot -pdebezium inventory
 ```
 ```
 ...
@@ -255,5 +255,5 @@ curl -s http://localhost:9200/customers/customer/1004 | jq .
 
 ## Destroy Stack
 ```
-docker compose down
+docker-compose down
 ```
