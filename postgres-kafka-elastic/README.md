@@ -30,7 +30,7 @@ docker-compose up -d
 ## View Logs
 Tail the `connect` container logs in a separate terminal. Review these logs when creating connectors in the subsequent POST commands below.
 ```
-docker compose logs connect -f
+docker-compose logs connect -f
 ```
 ```
 debezium-connect-1  | Using BOOTSTRAP_SERVERS=kafka:9092
@@ -43,7 +43,7 @@ debezium-connect-1  |       GROUP_ID=1
 ## Kafka Topics
 Launch bash terminal in kafka container:
 ```
-docker compose exec -it kafka bash
+docker-compose exec -it kafka bash
 ```
 
 List topics:
@@ -130,7 +130,7 @@ curl -H "Accept:application/json" localhost:8083/connectors/
 ### PSQL CLI
 Launch psql
 ```
-docker compose exec -it postgres psql -U postgresuser inventory
+docker-compose exec -it postgres psql -U postgresuser inventory
 ```
 
 Create table and content:
@@ -171,5 +171,5 @@ curl -s http://localhost:9200/pg.public.people/_search
 
 ## Destroy Stack
 ```
-docker compose down
+docker-compose down
 ```
