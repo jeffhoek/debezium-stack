@@ -130,6 +130,11 @@ curl -H "Accept:application/json" localhost:8083/connectors/
 ["elastic-sink"]
 ```
 
+Create another connector for the addresses:
+```
+curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @es-sink-addrs.json
+```
+
 ## Create MySQL Source
 Create the MySQL source connector:
 ```
@@ -151,7 +156,7 @@ Confirm the connector was created:
 curl -H "Accept:application/json" localhost:8083/connectors/
 ```
 ```
-["elastic-sink","inventory-connector"]
+["elastic-sink-addrs","elastic-sink","inventory-connector"]
 ```
 
 
@@ -160,13 +165,14 @@ Explore the following examples to validate the Connect functionality.
 
 
 ### Elasticsearch
-Check indices. (You should now see a `customers` index.):
+Check indices. (You should now see a `customers` and `addresses` indexes.):
 ```
 curl  http://localhost:9200/_cat/indices
 ```
 ```
 green  open .geoip_databases L-njLsExSLaaZq_D7qe3bg 1 0 42 0 40.8mb 40.8mb
 yellow open customers        awIg9xdDRpSqGa0hIYWVuQ 1 1  0 0   227b   227b
+yellow open addresses        17prDzrLRF-DY_YFD3_4JA 1 1  7   0   8.5kb   8.5kb
 ```
 
 Search the customers index:
