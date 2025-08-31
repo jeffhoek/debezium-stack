@@ -1,9 +1,8 @@
 ---
-version: '3'
 services:
   zookeeper:
     platform: linux/x86_64
-    image: quay.io/debezium/zookeeper:2.2
+    image: quay.io/debezium/zookeeper:3.2
     hostname: zookeeper
     container_name: zookeeper
     ports:
@@ -13,7 +12,7 @@ services:
 
   kafka:
     platform: linux/x86_64
-    image: quay.io/debezium/kafka:2.2
+    image: quay.io/debezium/kafka:3.2
     ports:
       - 9092:9092
     environment:
@@ -23,7 +22,7 @@ services:
 
   mysql:
     platform: linux/x86_64
-    image: quay.io/debezium/example-mysql:2.2
+    image: quay.io/debezium/example-mysql:3.2
     ports:
      - 3306:3306
     environment:
@@ -32,18 +31,18 @@ services:
      - MYSQL_PASSWORD=mysqlpw
 
   elastic:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.10
+    image: elasticsearch:7.17.16
     ports:
      - "9200:9200"
     environment:
      - http.host=0.0.0.0
      - transport.host=127.0.0.1
      - xpack.security.enabled=false
-     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+     - "_JAVA_OPTIONS=-XX:UseSVE=0"
 
   kibana:
     container_name: kibana
-    image: docker.elastic.co/kibana/kibana:7.17.10
+    image: arm64v8/kibana:7.17.16
     environment:
       - ELASTICSEARCH_HOSTS=http://elastic:9200
     depends_on:
@@ -66,3 +65,4 @@ services:
      - CONFIG_STORAGE_TOPIC=my_connect_configs
      - OFFSET_STORAGE_TOPIC=my_connect_offsets
      - STATUS_STORAGE_TOPIC=my_source_connect_statuses
+     - JAVA_TOOL_OPTIONS="-XX:UseSVE=0"
