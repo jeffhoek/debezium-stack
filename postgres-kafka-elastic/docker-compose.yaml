@@ -2,7 +2,8 @@
 version: '3'
 services:
   zookeeper:
-    image: quay.io/debezium/zookeeper:2.2
+    platform: linux/x86_64
+    image: quay.io/debezium/zookeeper:3.2
     hostname: zookeeper
     container_name: zookeeper
     ports:
@@ -11,7 +12,8 @@ services:
       - 3888:3888
 
   kafka:
-    image: quay.io/debezium/kafka:2.2
+    platform: linux/x86_64
+    image: quay.io/debezium/kafka:3.2
     ports:
       - 9092:9092
     environment:
@@ -20,8 +22,7 @@ services:
       - zookeeper
 
   postgres:
-    # image: your_registry_namespace/postgis:15-master-decoderbufs
-    image: quay.io/debezium/postgres:11-alpine
+    image: quay.io/debezium/postgres:14-alpine
     ports:
      - "5432:5432"
     environment:
@@ -30,18 +31,18 @@ services:
      - POSTGRES_DB=inventory
 
   elastic:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.10
+    image: elasticsearch:7.17.6
     ports:
      - "9200:9200"
     environment:
      - http.host=0.0.0.0
      - transport.host=127.0.0.1
      - xpack.security.enabled=false
-     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+     - "_JAVA_OPTIONS=-XX:UseSVE=0"
 
   kibana:
     container_name: kibana
-    image: docker.elastic.co/kibana/kibana:7.17.10
+    image: arm64v8/kibana:7.17.6
     environment:
       - ELASTICSEARCH_HOSTS=http://elastic:9200
     depends_on:
@@ -52,9 +53,9 @@ services:
   connect:
     image: your_registry_namespace/connect-jdbc-es:2.7
     build:
-      context: debezium-jdbc-es
+      context: docker
       args:
-        DEBEZIUM_VERSION: 2.2
+        DEBEZIUM_VERSION: 2.7
     ports:
      - 8083:8083
      - 5005:5005
@@ -64,3 +65,4 @@ services:
      - CONFIG_STORAGE_TOPIC=my_connect_configs
      - OFFSET_STORAGE_TOPIC=my_connect_offsets
      - STATUS_STORAGE_TOPIC=my_source_connect_statuses
+     - JAVA_TOOL_OPTIONS="-XX:UseSVE=0"
