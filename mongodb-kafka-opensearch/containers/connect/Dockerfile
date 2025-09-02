@@ -9,7 +9,7 @@ ARG POSTGRES_VERSION=42.5.1
 ARG KAFKA_JDBC_VERSION=5.3.2
 ARG KAFKA_ELASTICSEARCH_VERSION=5.3.2
 ARG OPENSEARCH_VERSION=3.0.0
-ARG MONGODB_VERSION=2.3.0
+ARG MONGODB_VERSION="3.0.0.Final"
 
 # Deploy PostgreSQL JDBC Driver
 RUN cd /kafka/libs && curl -sO https://jdbc.postgresql.org/download/postgresql-$POSTGRES_VERSION.jar
@@ -20,8 +20,8 @@ RUN mkdir $KAFKA_CONNECT_JDBC_DIR && cd $KAFKA_CONNECT_JDBC_DIR &&\
 
 # MongoDB
 RUN mkdir $KAFKA_CONNECT_MONGODB_DIR && cd $KAFKA_CONNECT_MONGODB_DIR &&\
-    curl -sO https://repo1.maven.org/maven2/io/debezium/debezium-connector-mongodb/$MONGODB_VERSION.Final/debezium-connector-mongodb-$MONGODB_VERSION.Final-plugin.tar.gz &&\
-    tar xvf debezium-connector-mongodb-$MONGODB_VERSION.Final-plugin.tar.gz
+    curl -sO https://repo1.maven.org/maven2/io/debezium/debezium-connector-mongodb/$MONGODB_VERSION/debezium-connector-mongodb-$MONGODB_VERSION-plugin.tar.gz &&\
+    tar xvf debezium-connector-mongodb-$MONGODB_VERSION-plugin.tar.gz
 
 # Deploy OpenSearch sink connector
 RUN mkdir $KAFKA_CONNECT_OS_DIR && cd $KAFKA_CONNECT_OS_DIR &&\

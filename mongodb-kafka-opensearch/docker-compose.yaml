@@ -1,8 +1,7 @@
 ---
-version: '3'
 services:
   zookeeper:
-    image: quay.io/debezium/zookeeper:2.2
+    image: quay.io/debezium/zookeeper:3.2
     hostname: zookeeper
     container_name: zookeeper
     ports:
@@ -11,48 +10,38 @@ services:
       - 3888:3888
 
   kafka:
-    image: quay.io/debezium/kafka:2.2
+    image: quay.io/debezium/kafka:3.2
     ports:
       - 9092:9092
-    links:
-      - zookeeper
     environment:
      - ZOOKEEPER_CONNECT=zookeeper:2181
     depends_on:
       - zookeeper
 
   mongodb:
-    image: debezium/example-mongodb
+    image: debezium/example-mongodb:3.0.0.Final
     ports:
       - 27017:27017
     restart: always
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ADMIN_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ADMIN_PASSWORD}
 
-  mongo-express:
-    image: mongo-express
-    restart: always
-    ports:
-      - 8081:8081
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: root
-      ME_CONFIG_MONGODB_ADMINPASSWORD: example
-      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongodb:27017/?replicaSet=rs0
-
-  postgres:
-    image: quay.io/debezium/postgres:11-alpine
-    ports:
-     - "5432:5432"
-    environment:
-     - POSTGRES_USER=postgresuser
-     - POSTGRES_PASSWORD=postgrespw
-     - POSTGRES_DB=inventory
+  # mongo-express:
+  #   image: mongo-express
+  #   restart: always
+  #   ports:
+  #     - 8081:8081
+  #   environment:
+  #     ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_ADMIN_USER}
+  #     ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ADMIN_PASSWORD}
+  #     ME_CONFIG_MONGODB_URL: mongodb://${MONGO_ADMIN_USER}:${MONGO_ADMIN_PASSWORD}@mongodb:27017/?replicaSet=rs0
 
   opensearch-node1:
     image: opensearchproject/opensearch:latest
     container_name: opensearch-node1
     environment:
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_ADMIN_PASSWORD}
       - cluster.name=opensearch-cluster
       - node.name=opensearch-node1
       - discovery.seed_hosts=opensearch-node1
@@ -88,18 +77,14 @@ services:
     build:
       context: ./containers/connect
       args:
-        DEBEZIUM_VERSION: 2.3
+        DEBEZIUM_VERSION: 2.7
     ports:
      - 8083:8083
      - 5005:5005
-    links:
-     - kafka
-     - mongodb
-     - postgres
-     - opensearch-node1
     environment:
      - BOOTSTRAP_SERVERS=kafka:9092
      - GROUP_ID=1
      - CONFIG_STORAGE_TOPIC=my_connect_configs
      - OFFSET_STORAGE_TOPIC=my_connect_offsets
      - STATUS_STORAGE_TOPIC=my_source_connect_statuses
+     - JAVA_TOOL_OPTIONS="-XX:UseSVE=0"
