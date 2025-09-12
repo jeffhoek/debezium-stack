@@ -9,8 +9,8 @@
         "type.name": "city",
         "behavior.on.null.values": "delete",
         "key.ignore": "true",
-        "transforms": "RemoveId",
-        "transforms.RemoveId.type": "org.apache.kafka.connect.transforms.ReplaceField$Value",
-        "transforms.RemoveId.blacklist": "_id"
+        "transforms": "RenameId",
+        "transforms.RenameId.type": "org.apache.kafka.connect.transforms.ReplaceField$Value",
+        "transforms.RenameId.renames": "_id:mongo_id"
     }
 }
