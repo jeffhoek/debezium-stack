@@ -27,16 +27,6 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ADMIN_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ADMIN_PASSWORD}
 
-  # mongo-express:
-  #   image: mongo-express
-  #   restart: always
-  #   ports:
-  #     - 8081:8081
-  #   environment:
-  #     ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_ADMIN_USER}
-  #     ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ADMIN_PASSWORD}
-  #     ME_CONFIG_MONGODB_URL: mongodb://${MONGO_ADMIN_USER}:${MONGO_ADMIN_PASSWORD}@mongodb:27017/?replicaSet=rs0
-
   opensearch-node1:
     image: opensearchproject/opensearch:latest
     container_name: opensearch-node1
@@ -49,7 +39,6 @@ services:
       - plugins.security.disabled=true
       - bootstrap.memory_lock=true # along with the memlock settings below, disables swapping
       - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
-      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=open3SEARCH*pass
     ulimits:
       memlock:
         soft: -1
@@ -88,4 +77,4 @@ services:
      - CONFIG_STORAGE_TOPIC=my_connect_configs
      - OFFSET_STORAGE_TOPIC=my_connect_offsets
      - STATUS_STORAGE_TOPIC=my_source_connect_statuses
-     - JAVA_TOOL_OPTIONS="-XX:UseSVE=0"
+    #  - JAVA_TOOL_OPTIONS="-XX:UseSVE=0"
