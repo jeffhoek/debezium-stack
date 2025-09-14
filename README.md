@@ -7,7 +7,8 @@ These stacks have been developed and tested under Mac OS Sonoma running on Apple
 
 ## Prerequisites
 
-- [Podman Desktop](https://podman-desktop.io/
+- [Podman Desktop](https://podman-desktop.io/)
+
 OR
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
