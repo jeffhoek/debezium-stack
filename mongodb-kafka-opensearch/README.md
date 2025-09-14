@@ -49,11 +49,6 @@ You should see e.g.
 ```
 
 ### Kafka Topics
-Launch bash terminal in kafka container:
-```
-podman compose exec -it kafka bash
-```
-
 List topics:
 ```
 podman compose exec kafka bin/kafka-topics.sh --list --bootstrap-server=kafka:9092
@@ -67,9 +62,9 @@ podman compose exec kafka bin/kafka-console-consumer.sh --bootstrap-server=kafka
 ## MongoDB
 
 ### Initiate the Replica Set
-We will eventually extend the compose startup process to do this automatically, but for now you will need to run this command:
+We will eventually automate this, but for now you will need to _manually_ initialize (initiate) the replica set.
 
-First, log into mongodb (enter the password when prompted):
+First, log in to mongodb using mongosh (enter the password when prompted):
 ```
 mongosh -u root
 ```
@@ -80,7 +75,7 @@ rs.initiate()
 ```
 
 ### Create MongoDB Source Connector
-Create the source connector.  Note, you may need to update some of these key/value pairs for your use cases. For this example we set `database.include.list` to include our expected `inventory` database.
+Create the source connector.  Note, review the key/value pairs. You may need to update some of these for your expected data. For this example we set `database.include.list` to include our expected `inventory` database. All collections will be "sourced".
 
 ```
 curl -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @mongodb-source.json
@@ -118,7 +113,7 @@ curl -H "Accept:application/json" localhost:8083/connectors/
 ## Test Data
 You will need to insert some JSON data into a collection in the `inventory` mongodb database. You can use `mongosh` for this, or use the steps below to download the CISA Known Exploited Vulnerabilities (KEV) dataset JSON.
 
-> Note: If don't have `mongoimport` tool see [https://www.mongodb.com/try/download/database-tools](https://www.mongodb.com/try/download/database-tools)
+> Note: If don't have `mongoimport` or other MongoDB tools see [https://www.mongodb.com/try/download/database-tools](https://www.mongodb.com/try/download/database-tools).
 
 ### CISA KEV dataset
 Download the CISA KEV dataset from [https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json](https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json).
@@ -148,7 +143,7 @@ OpenSearch Dashboard should be available at [http://localhost:5601](http://local
 
 Dev tools are here: [http://localhost:5601/app/dev_tools#/console](http://localhost:5601/app/dev_tools#/console)
 
-### Curl OpenSearch
+### OpenSearch Healthcheck
 Confirm OpenSearch is running on the default port:
 ```
 curl  http://localhost:9200
@@ -173,34 +168,20 @@ curl  http://localhost:9200
 }
 ```
 
-### Check OpenSearch indices
+### Get OpenSearch indices
 ```
-curl  http://localhost:9200/_cat/indices
+curl -X GET  http://localhost:9200/_cat/indices
 ```
 ```
 green  open .opensearch-observability N1I5edQCQU-sLO5Td1OvEg 1 0 0 0  208b  208b
 green  open .kibana_1                 H8bTAGoJQDubG6fewoXFvQ 1 0 1 0 5.1kb 5.1kb
 ```
 
-### Create the OpenSearch Sink Connector(s)
-Create the OpenSearch sink connector using curl:
-```
-curl -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @opensearch-sink.json
-```
+### Create the OpenSearch Sink Connector
 
-```{"name":"opensearch-connector","config":{"name":"opensearch-connector","connector.class":"io.aiven.kafka.connect.opensearch.OpensearchSinkConnector","topics":"pg.public.cities","connection.url":"http://opensearch-node1:9200","transforms":"unwrap,key","transforms.unwrap.type":"io.debezium.transforms.ExtractNewRecordState","transforms.unwrap.drop.tombstones":"false","transforms.key.type":"org.apache.kafka.connect.transforms.ExtractField$Key","transforms.key.field":"id","type.name":"city","tasks.max":"1","key.ignore":"false","behavior.on.null.values":"delete"},"tasks":[],"type":"sink"}```
-
-Confirm the connector was created:
+Create sink connector for the cisa-kev topic:
 ```
-curl -H "Accept:application/json" localhost:8083/connectors/
-```
-```
-["inventory-connector", "opensearch-connector"]
-```
-
-Create another connector for cisa-kev dataset:
-```
-curl -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @mongodb-source.json
+curl -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @opensearch-sink-cisakev.json | jq .
 ```
 You should see a reponse like:
 ```
@@ -224,7 +205,15 @@ You should see a reponse like:
 }
 ```
 
-If the connector is working you should see a new index with ~1413 documents:
+Confirm the connector was created:
+```
+curl -X GET -H "Accept:application/json" localhost:8083/connectors/
+```
+```
+["opensearch-connector-cisakev","inventory-connector"]
+```
+
+If the sink connector is working you should see a new OpenSearch index with ~1413 documents:
 ```
 curl  http://localhost:9200/_cat/indices
 ```
@@ -233,13 +222,15 @@ yellow open mongodb.inventory.cisa_kev_mongo VS1A0GqjQLON_C5BqXuWWw 1 1 1413 0  
 ...
 ```
 
+
+
 ### Test Elasticsearch _search API
 Test basic search:
 ```
 curl -s http://localhost:9200/mongodb.inventory.cisa_kev_mongo/_search\?q\="ios" | jq -C . | less
 ```
 
-Search the cisa-kev index:
+Search for specific CVE. Note that even though multiple hits are returned the first hit is the correct match.
 ```
 curl -s http://localhost:9200/mongodb.inventory.cisa_kev_mongo/_search\?q\="CVE-2020-6820" | jq -r -C '.hits.hits[0]._source'
 ```

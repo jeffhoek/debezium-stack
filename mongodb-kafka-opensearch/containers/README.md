@@ -5,5 +5,5 @@ See below for manual build steps.
 Build the custom Kafka Connect container image:
 ```
 cd containers/connect &&\
-docker build --build-arg DEBEZIUM_VERSION=2.3 -t your_registry_namespace/connect-jdbc-opensearch-mongodb:2.3 .
+docker build --build-arg DEBEZIUM_VERSION=3.2.2.Final -t your_registry_namespace/my-custom-connect:2.3 .
 ```
