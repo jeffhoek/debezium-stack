@@ -117,15 +117,18 @@ You will need to insert some JSON data into a collection in the `inventory` mong
 
 ### CISA KEV dataset
 Download the CISA KEV dataset from [https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json](https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json).
-
-Extract the vulnerabilites list from the JSON into JSON lines using the included script:
 ```
-./mongodb-mongoimport-prepare.sh ~/Downloads/known_exploited_vulnerabilities.json cisa-kev > kev-mongodb-bulk.ndjson
+curl -s https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json -o known_exploited_vulnerabilities.json
+```
+
+Extract the individual vulnerabilites into JSON lines using the included Bash script:
+```
+./cisa-kev-to-jsonl.sh ~/Downloads/known_exploited_vulnerabilities.json > cisa-kev.jsonl
 ```
 
 Import the dataset using mongoimport (enter the password when prompted):
 ```
-mongoimport -u root --authenticationDatabase=admin --uri=mongodb://127.0.0.1:27017 --db=inventory --collection=cisa_kev_mongo --file=./kev-mongodb-bulk.ndjson
+mongoimport -u root --authenticationDatabase=admin --uri=mongodb://127.0.0.1:27017 --db=inventory --collection=cisa_kev_mongo --file=./cisa-kev.jsonl
 ```
 
 Check the Kafka topics (you should see the new topic):
