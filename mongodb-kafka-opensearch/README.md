@@ -61,7 +61,7 @@ bin/kafka-topics.sh --list --bootstrap-server=kafka:9092
 
 Consume a topic:
 ```
-bin/kafka-console-consumer.sh --bootstrap-server=kafka:9092 --topic=pg.public.customers --from-beginning
+bin/kafka-console-consumer.sh --bootstrap-server=kafka:9092 --topic=mongodb.inventory.cities --from-beginning
 ```
 
 ## OpenSearch Dashboard

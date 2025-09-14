@@ -1,12 +1,12 @@
 {
-    "name": "opensearch-connector",
+    "name": "opensearch-connector-cisakev",
     "config": {
-        "name":"opensearch-connector",
+        "name":"opensearch-connector-cisakev",
         "connector.class": "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector",
         "tasks.max":"1",
-        "topics": "mongodb.inventory.cities",
+        "topics": "mongodb.inventory.cisa_kev_mongo",
         "connection.url": "http://opensearch-node1:9200",
-        "type.name": "city",
+        "type.name": "kev",
         "behavior.on.null.values": "delete",
         "key.ignore": "true",
         "transforms": "RenameId",
