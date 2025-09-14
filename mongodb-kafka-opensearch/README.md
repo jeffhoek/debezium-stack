@@ -116,14 +116,14 @@ You will need to insert some JSON data into a collection in the `inventory` mong
 > Note: If don't have `mongoimport` or other MongoDB tools see [https://www.mongodb.com/try/download/database-tools](https://www.mongodb.com/try/download/database-tools).
 
 ### CISA KEV dataset
-Download the CISA KEV dataset from [https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json](https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json).
+Download the CISA KEV dataset from [here](https://www.cisa.gov/known-exploited-vulnerabilities-catalog). Or use curl:
 ```
 curl -s https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json -o known_exploited_vulnerabilities.json
 ```
 
 Extract the individual vulnerabilites into JSON lines using the included Bash script:
 ```
-./cisa-kev-to-jsonl.sh ~/Downloads/known_exploited_vulnerabilities.json > cisa-kev.jsonl
+./cisa-kev-to-jsonl.sh ./known_exploited_vulnerabilities.json > cisa-kev.jsonl
 ```
 
 Import the dataset using mongoimport (enter the password when prompted):
@@ -227,7 +227,7 @@ yellow open mongodb.inventory.cisa_kev_mongo VS1A0GqjQLON_C5BqXuWWw 1 1 1413 0  
 
 
 
-### Test Elasticsearch _search API
+### Test OpenSearch _search API
 Test basic search:
 ```
 curl -s http://localhost:9200/mongodb.inventory.cisa_kev_mongo/_search\?q\="ios" | jq -C . | less
