@@ -67,7 +67,7 @@ services:
     build:
       context: ./containers/connect
       args:
-        DEBEZIUM_VERSION: 2.7
+        DEBEZIUM_VERSION: 3.2.2.Final
     ports:
      - 8083:8083
      - 5005:5005
