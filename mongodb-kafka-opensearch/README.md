@@ -1,11 +1,13 @@
 # Debezium Stack
-Docker Compose example based on the official tutorial [here](https://debezium.io/documentation/reference/stable/tutorial.html).
+This "change data capture" stack produces data from MongoDB into a Kafka topic, and then consumes into OpenSearch.
 
-This stack was tested on Mac OS Sonoma on Apple M1 Max hardware. YMMV.
+This Docker Compose example is based on the official tutorial [here](https://debezium.io/documentation/reference/stable/tutorial.html).
+
+This stack was tested on Mac OS Sonoma on Apple M1 Max hardware. Some additional Java options may be required on newer (M4) silicon. The goal is to eventually support Mac and Linux.
 
 ## Prerequisites
-- [Podman Desktop](https://podman-desktop.io/): Docker Desktop is not officially supported.
-- [MongoDB tools](https://www.mongodb.com/try/download/database-tools): Specifically mongosh and mongoimport if you want to easily import data from the CLI.
+- [Podman Desktop](https://podman-desktop.io/): Docker Desktop might also work.
+
 
 ## Launch Stack
 ```
@@ -23,7 +25,7 @@ podman compose up -d --build
 ```
 
 ## View Logs
-Tail the `connect` container logs in a separate terminal. Review these logs when creating connectors in the subsequent POST commands below.
+Use `podman compose logs <service_name>` to view logs from `<service_name>`.  You may want to follow the `connect` service logs (user control-C to exit):
 ```
 podman compose logs connect -f
 ```
@@ -35,38 +37,25 @@ debezium-connect-1  |       GROUP_ID=1
 ...
 ```
 
-## Kafka
 
-### Check the Connect PlugIns
+## Check the Kafka Connect PlugIns
 ```bash
-curl http://localhost:8083/connector-plugins | jq .
+curl http://localhost:8083/connector-plugins | jq -c '.[]'
 ```
-You should see e.g.
+You should see the MongoDB source and Opensearch sink:
 ```
-...
-"class": "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector",
-...
-```
-
-### Kafka Topics
-List topics:
-```
-podman compose exec kafka bin/kafka-topics.sh --list --bootstrap-server=kafka:9092
-```
-
-Consume a topic:
-```
-podman compose exec kafka bin/kafka-console-consumer.sh --bootstrap-server=kafka:9092 --topic=mongodb.inventory.cities --from-beginning
+{"class":"io.aiven.kafka.connect.opensearch.OpensearchSinkConnector","type":"sink","version":"3.0.0"}
+{"class":"io.debezium.connector.mongodb.MongoDbConnector","type":"source","version":"3.2.2.Final"}
 ```
 
 ## MongoDB
 
 ### Initiate the Replica Set
-We will eventually automate this, but for now you will need to _manually_ initialize (initiate) the replica set.
+Until this gets automated you will need to _manually_ initialize (initiate) the replica set.
 
-First, log in to mongodb using mongosh (enter the password when prompted):
+First, log in to MongoDB using Mongo Shell (`mongosh`). Enter the password when prompted:
 ```
-mongosh -u root
+podman compose exec -it mongodb mongosh -u root
 ```
 
 Initiate the replica set:
@@ -74,11 +63,29 @@ Initiate the replica set:
 rs.initiate()
 ```
 
-### Create MongoDB Source Connector
-Create the source connector.  Note, review the key/value pairs. You may need to update some of these for your expected data. For this example we set `database.include.list` to include our expected `inventory` database. All collections will be "sourced".
+### Test Data
+We will also create some test data...
+
+Switch to the `inventory` database:
+```
+use inventory
+```
+
+Create a test document in the cities collection:
+```
+db.cities.insertOne({city:"Charleston", state:"SC", zip:"29401"})
+```
+Feel free to insert additional cities for testing search and change data capture.
 
 ```
-curl -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @mongodb-source.json
+exit
+```
+
+### Create the MongoDB Source Connector
+Create the source connector.  Note, review the key/value pairs in [mongodb-source.json](./mongodb-source.json). You may want to update values, for example, if you have a different database name, etc. For this example we set `database.include.list` to include our `inventory` database.
+
+```
+curl -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @mongodb-source.json | jq .
 ```
 
 Expected response:
@@ -109,35 +116,23 @@ curl -H "Accept:application/json" localhost:8083/connectors/
 ["inventory-connector"]
 ```
 
-
-## Test Data
-You will need to insert some JSON data into a collection in the `inventory` mongodb database. You can use `mongosh` for this, or use the steps below to download the CISA Known Exploited Vulnerabilities (KEV) dataset JSON.
-
-> Note: If don't have `mongoimport` or other MongoDB tools see [https://www.mongodb.com/try/download/database-tools](https://www.mongodb.com/try/download/database-tools).
-
-### CISA KEV dataset
-Download the CISA KEV dataset from [here](https://www.cisa.gov/known-exploited-vulnerabilities-catalog). Or use curl:
+## Kafka Topics
+List topics:
 ```
-curl -s https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json -o known_exploited_vulnerabilities.json
+podman compose exec kafka bin/kafka-topics.sh --list --bootstrap-server=kafka:9092
 ```
 
-Extract the individual vulnerabilites into JSON lines using the included Bash script:
+You should see:
 ```
-./cisa-kev-to-jsonl.sh ./known_exploited_vulnerabilities.json > cisa-kev.jsonl
-```
-
-Import the dataset using mongoimport (enter the password when prompted):
-```
-mongoimport -u root --authenticationDatabase=admin --uri=mongodb://127.0.0.1:27017 --db=inventory --collection=cisa_kev_mongo --file=./cisa-kev.jsonl
+mongodb.inventory.cities
 ```
 
-Check the Kafka topics (you should see the new topic):
+Consume a topic:
 ```
-podman compose exec -it kafka bin/kafka-topics.sh --list --bootstrap-server=kafka:9092
+podman compose exec kafka bin/kafka-console-consumer.sh --bootstrap-server=kafka:9092 --topic=mongodb.inventory.cities --from-beginning
 ```
 ```
-mongodb.inventory.cisa_kev_mongo
-...
+{"schema":{"type":"struct","fields":[{"type":"string","optional":true,"field":"_id"},{"type":"string","optional":true,"field":"city"},{"type":"string","optional":true,"field":"state"},{"type":"string","optional":true,"field":"zip"}],"optional":false,"name":"mongodb.inventory.cities"},"payload":{"_id":"68c769803f6e28aa934392b1","city":"Charleston","state":"SC","zip":"29401"}}
 ```
 
 
@@ -175,6 +170,7 @@ curl  http://localhost:9200
 ```
 curl -X GET  http://localhost:9200/_cat/indices
 ```
+You may see some default indexes:
 ```
 green  open .opensearch-observability N1I5edQCQU-sLO5Td1OvEg 1 0 0 0  208b  208b
 green  open .kibana_1                 H8bTAGoJQDubG6fewoXFvQ 1 0 1 0 5.1kb 5.1kb
@@ -182,21 +178,21 @@ green  open .kibana_1                 H8bTAGoJQDubG6fewoXFvQ 1 0 1 0 5.1kb 5.1kb
 
 ### Create the OpenSearch Sink Connector
 
-Create sink connector for the cisa-kev topic:
+Create sink connector:
 ```
-curl -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @opensearch-sink-cisakev.json | jq .
+curl -s -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @opensearch-sink.json | jq .
 ```
 You should see a reponse like:
 ```
 {
-  "name": "opensearch-connector-cisakev",
+  "name": "opensearch-connector",
   "config": {
-    "name": "opensearch-connector-cisakev",
+    "name": "opensearch-connector",
     "connector.class": "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector",
     "tasks.max": "1",
-    "topics": "mongodb.inventory.cisa_kev_mongo",
+    "topics": "mongodb.inventory.cities",
     "connection.url": "http://opensearch-node1:9200",
-    "type.name": "kev",
+    "type.name": "city",
     "behavior.on.null.values": "delete",
     "key.ignore": "true",
     "transforms": "RenameId",
@@ -210,49 +206,56 @@ You should see a reponse like:
 
 Confirm the connector was created:
 ```
-curl -X GET -H "Accept:application/json" localhost:8083/connectors/
+curl -s -X GET -H "Accept:application/json" localhost:8083/connectors/
 ```
 ```
-["opensearch-connector-cisakev","inventory-connector"]
+["opensearch-connector","inventory-connector"]
 ```
 
-If the sink connector is working you should see a new OpenSearch index with ~1413 documents:
+If the sink connector is working you should see a new OpenSearch index with some hits:
 ```
 curl  http://localhost:9200/_cat/indices
 ```
 ```
-yellow open mongodb.inventory.cisa_kev_mongo VS1A0GqjQLON_C5BqXuWWw 1 1 1413 0    1mb    1mb
-...
+yellow open mongodb.inventory.cities         TqXXvjaZRp6GYufbTxX31w 1 1    1  0   6.1kb   6.1kb
 ```
-
 
 
 ### Test OpenSearch _search API
 Test basic search:
 ```
-curl -s http://localhost:9200/mongodb.inventory.cisa_kev_mongo/_search\?q\="ios" | jq -C . | less
-```
-
-Search for specific CVE. Note that even though multiple hits are returned the first hit is the correct match.
-```
-curl -s http://localhost:9200/mongodb.inventory.cisa_kev_mongo/_search\?q\="CVE-2020-6820" | jq -r -C '.hits.hits[0]._source'
+curl -s http://localhost:9200/mongodb.inventory.cities/_search | jq .
 ```
 ```
 {
-  "mongo_id": "68c72253c5a97d4060f51c51",
-  "cveID": "CVE-2020-6820",
-  "vendorProject": "Mozilla",
-  "product": "Firefox and Thunderbird",
-  "vulnerabilityName": "Mozilla Firefox And Thunderbird Use-After-Free Vulnerability",
-  "dateAdded": "2021-11-03",
-  "shortDescription": "Mozilla Firefox and Thunderbird contain a race condition vulnerability when handling a ReadableStream under certain conditions. The race condition creates a use-after-free vulnerability, causing unspecified impacts.",
-  "requiredAction": "Apply updates per vendor instructions.",
-  "dueDate": "2022-05-03",
-  "knownRansomwareCampaignUse": "Unknown",
-  "notes": "https://nvd.nist.gov/vuln/detail/CVE-2020-6820",
-  "cwes": [
-    "CWE-362"
-  ]
+  "took": 2,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 1,
+      "relation": "eq"
+    },
+    "max_score": 1,
+    "hits": [
+      {
+        "_index": "mongodb.inventory.cities",
+        "_id": "mongodb.inventory.cities+0+0",
+        "_score": 1,
+        "_source": {
+          "mongo_id": "68c769803f6e28aa934392b1",
+          "city": "Charleston",
+          "state": "SC",
+          "zip": "29401"
+        }
+      }
+    ]
+  }
 }
 ```
 

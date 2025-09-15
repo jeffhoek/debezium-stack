@@ -20,3 +20,6 @@ OR
 - [mysql-kafka-elastic](./mysql-kafka-elastic/)
 - [postgres-kafka-elastic](./postgres-kafka-elastic/)
 - [postgis-kafka-opensearch](./postgis-kafka-opensearch/)
+
+## Datasets
+See [DATASETS](./DATASETS.md)
