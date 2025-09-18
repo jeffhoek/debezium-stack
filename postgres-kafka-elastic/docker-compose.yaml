@@ -2,7 +2,6 @@
 version: '3'
 services:
   zookeeper:
-    platform: linux/x86_64
     image: quay.io/debezium/zookeeper:3.2
     hostname: zookeeper
     container_name: zookeeper
@@ -12,7 +11,6 @@ services:
       - 3888:3888
 
   kafka:
-    platform: linux/x86_64
     image: quay.io/debezium/kafka:3.2
     ports:
       - 9092:9092
@@ -31,18 +29,18 @@ services:
      - POSTGRES_DB=inventory
 
   elastic:
-    image: elasticsearch:7.17.6
+    image: elasticsearch:7.17.16
     ports:
      - "9200:9200"
     environment:
      - http.host=0.0.0.0
      - transport.host=127.0.0.1
      - xpack.security.enabled=false
-     - "_JAVA_OPTIONS=-XX:UseSVE=0"
+    #  - "_JAVA_OPTIONS=-XX:UseSVE=0"
 
   kibana:
     container_name: kibana
-    image: arm64v8/kibana:7.17.6
+    image: arm64v8/kibana:7.17.16
     environment:
       - ELASTICSEARCH_HOSTS=http://elastic:9200
     depends_on:
@@ -51,11 +49,10 @@ services:
       - 5601:5601
 
   connect:
-    image: your_registry_namespace/connect-jdbc-es:2.7
     build:
       context: docker
       args:
-        DEBEZIUM_VERSION: 2.7
+        DEBEZIUM_VERSION: 3.2.2.Final
     ports:
      - 8083:8083
      - 5005:5005
