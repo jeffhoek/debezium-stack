@@ -1,7 +1,6 @@
 ---
 services:
   zookeeper:
-    platform: linux/x86_64
     image: quay.io/debezium/zookeeper:3.2
     hostname: zookeeper
     container_name: zookeeper
@@ -11,7 +10,6 @@ services:
       - 3888:3888
 
   kafka:
-    platform: linux/x86_64
     image: quay.io/debezium/kafka:3.2
     ports:
       - 9092:9092
@@ -21,7 +19,6 @@ services:
       - zookeeper
 
   mysql:
-    platform: linux/x86_64
     image: quay.io/debezium/example-mysql:3.2
     ports:
      - 3306:3306
@@ -51,11 +48,10 @@ services:
       - 5601:5601
 
   connect:
-    image: your_registry_namespace/connect-jdbc-es:2.7
     build:
       context: docker
       args:
-        DEBEZIUM_VERSION: 2.7
+        DEBEZIUM_VERSION: 3.2.2.Final
     ports:
      - 8083:8083
      - 5005:5005
@@ -65,4 +61,4 @@ services:
      - CONFIG_STORAGE_TOPIC=my_connect_configs
      - OFFSET_STORAGE_TOPIC=my_connect_offsets
      - STATUS_STORAGE_TOPIC=my_source_connect_statuses
-     - JAVA_TOOL_OPTIONS="-XX:UseSVE=0"
+    #  - JAVA_TOOL_OPTIONS="-XX:UseSVE=0"
