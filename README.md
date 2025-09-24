@@ -22,4 +22,4 @@ OR
 - [postgis-kafka-opensearch](./postgis-kafka-opensearch/)
 
 ## Datasets
-See [DATASETS](./DATASETS.md)
+See this [README](./data/README.md)
