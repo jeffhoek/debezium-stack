@@ -85,7 +85,7 @@ exit
 Create the source connector.  Note, review the key/value pairs in [mongodb-source.json](./mongodb-source.json). You may want to update values, for example, if you have a different database name, etc. For this example we set `database.include.list` to include our `inventory` database.
 
 ```
-curl -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @mongodb-source.json | jq .
+curl -s -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @mongodb-source.json | jq .
 ```
 
 Expected response:
