@@ -2,9 +2,9 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "stacks" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "stacks" ]
 
 jobs:
 
@@ -14,5 +14,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Build the Kafka Connect-JDBC-Elasticsearch image
-      run: cd debezium-jdbc-es && docker build --build-arg DEBEZIUM_VERSION=2.3 --tag your_registry_namespace/connect-jdbc-es:$(date +%s) .
+    - name: Build the custom Opensearch Kafka Connect image
+      run: cd mongodb-kafka-opensearch/containers/connect && docker build --build-arg DEBEZIUM_VERSION=3.2.2.Final --tag your_registry_namespace/my-connect-opensearch:$(date +%s) .
+    - name: Build the custom Elastic Kafka Connect image (for mysql)
+      run: cd mysql-kafka-elastic/docker && docker build --build-arg DEBEZIUM_VERSION=3.2.2.Final --tag your_registry_namespace/my-connect-elastic-mysql:$(date +%s) .
+    - name: Build the custom Elastic Kafka Connect image (for postgres)
+      run: cd postgres-kafka-elastic/docker && docker build --build-arg DEBEZIUM_VERSION=3.2.2.Final --tag your_registry_namespace/my-connect-elastic-pg:$(date +%s) .
