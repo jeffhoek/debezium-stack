@@ -79,3 +79,205 @@ curl -s http://localhost:9200/mongodb.inventory.cisa_kev_mongo/_search\?q\="CVE-
   ]
 }
 ```
+
+#### Terms Aggregations
+
+Using Opensearch Dashboards [Dev Tools](http://localhost:5601/app/dev_tools#/console):
+```
+GET mongodb.inventory.cisa_kev_mongo/_search
+{
+  "size": 0,
+  "aggs": {
+    "my_topk": {
+      "terms": {
+        "field": "vendorProject.keyword",
+        "size": 10
+      }
+    }
+  }
+}
+```
+
+Using Curl:
+```
+curl -s -XGET "http://localhost:9200/mongodb.inventory.cisa_kev_mongo/_search" -H 'Content-Type: application/json' -d'
+{
+  "size": 0,
+  "aggs": {
+    "my_topk": {
+      "terms": {
+        "field": "vendorProject.keyword",
+        "size": 5
+      }
+    }
+  }
+}' | jq -c '.aggregations.my_topk.buckets[]'
+```
+```
+{"key":"Microsoft","doc_count":340}
+{"key":"Apple","doc_count":84}
+{"key":"Cisco","doc_count":78}
+{"key":"Adobe","doc_count":74}
+{"key":"Google","doc_count":64}
+```
+
+Nested aggregations:
+```
+curl -s -XGET "http://localhost:9200/mongodb.inventory.cisa_kev_mongo/_search" -H 'Content-Type: application/json' -d'
+{
+  "size": 0,
+  "aggs": {
+    "my_topk": {
+      "terms": {
+        "field": "vendorProject.keyword",
+        "size": 5
+      },
+      "aggs": {
+        "top_products": {
+          "terms": {
+            "field": "product.keyword",
+            "size": 5
+          }
+        }
+      }
+    }
+  }
+}'
+```
+
+This jq expression will parse a short summary of the aggregation:
+```
+| jq -C '.aggregations.my_topk.buckets[] | {vendor:.key, docs:.doc_count, products:.top_products.buckets}'
+```
+```
+{
+  "vendor": "Microsoft",
+  "docs": 340,
+  "products": [
+    {
+      "key": "Windows",
+      "doc_count": 150
+    },
+    {
+      "key": "Internet Explorer",
+      "doc_count": 33
+    },
+    {
+      "key": "Office",
+      "doc_count": 25
+    },
+    {
+      "key": "Win32k",
+      "doc_count": 25
+    },
+    {
+      "key": "Exchange Server",
+      "doc_count": 16
+    }
+  ]
+}
+{
+  "vendor": "Apple",
+  "docs": 84,
+  "products": [
+    {
+      "key": "Multiple Products",
+      "doc_count": 45
+    },
+    {
+      "key": "iOS, iPadOS, and macOS",
+      "doc_count": 11
+    },
+    {
+      "key": "iOS",
+      "doc_count": 8
+    },
+    {
+      "key": "macOS",
+      "doc_count": 5
+    },
+    {
+      "key": "iOS and iPadOS",
+      "doc_count": 4
+    }
+  ]
+}
+{
+  "vendor": "Cisco",
+  "docs": 78,
+  "products": [
+    {
+      "key": "IOS and IOS XE Software",
+      "doc_count": 14
+    },
+    {
+      "key": "Adaptive Security Appliance (ASA) and Firepower Threat Defense (FTD)",
+      "doc_count": 6
+    },
+    {
+      "key": "IOS XR",
+      "doc_count": 6
+    },
+    {
+      "key": "IOS software",
+      "doc_count": 6
+    },
+    {
+      "key": "Small Business RV160, RV260, RV340, and RV345 Series Routers",
+      "doc_count": 5
+    }
+  ]
+}
+{
+  "vendor": "Adobe",
+  "docs": 74,
+  "products": [
+    {
+      "key": "Flash Player",
+      "doc_count": 33
+    },
+    {
+      "key": "ColdFusion",
+      "doc_count": 15
+    },
+    {
+      "key": "Acrobat and Reader",
+      "doc_count": 13
+    },
+    {
+      "key": "Reader and Acrobat",
+      "doc_count": 6
+    },
+    {
+      "key": "Commerce and Magento Open Source",
+      "doc_count": 2
+    }
+  ]
+}
+{
+  "vendor": "Google",
+  "docs": 64,
+  "products": [
+    {
+      "key": "Chromium V8",
+      "doc_count": 35
+    },
+    {
+      "key": "Chromium",
+      "doc_count": 4
+    },
+    {
+      "key": "Chromium Blink",
+      "doc_count": 2
+    },
+    {
+      "key": "Chromium Intents",
+      "doc_count": 2
+    },
+    {
+      "key": "Chromium Mojo",
+      "doc_count": 2
+    }
+  ]
+}
+```
