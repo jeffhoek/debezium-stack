@@ -1,0 +1,17 @@
+{
+    "name": "elastic-sink",
+    "config": {
+        "connector.class": "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector",
+        "tasks.max": "1",
+        "topics": "pg.public.people",
+        "connection.url": "http://elastic:9200",
+        "transforms": "unwrap,key",
+        "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+        "transforms.unwrap.drop.tombstones": "false",
+        "transforms.key.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
+        "transforms.key.field": "id",
+        "key.ignore": "false",
+        "type.name": "person",
+        "behavior.on.null.values": "delete"
+    }
+}

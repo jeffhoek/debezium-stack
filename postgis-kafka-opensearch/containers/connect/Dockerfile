@@ -1,11 +1,13 @@
 ARG DEBEZIUM_VERSION
 FROM quay.io/debezium/connect:${DEBEZIUM_VERSION}
 ENV KAFKA_CONNECT_JDBC_DIR=$KAFKA_CONNECT_PLUGINS_DIR/kafka-connect-jdbc \
-    KAFKA_CONNECT_ES_DIR=$KAFKA_CONNECT_PLUGINS_DIR/kafka-connect-elasticsearch
+    KAFKA_CONNECT_ES_DIR=$KAFKA_CONNECT_PLUGINS_DIR/kafka-connect-elasticsearch \
+    KAFKA_CONNECT_OS_DIR=$KAFKA_CONNECT_PLUGINS_DIR/kafka-connect-opensearch
 
 ARG POSTGRES_VERSION=42.5.1
 ARG KAFKA_JDBC_VERSION=5.3.2
 ARG KAFKA_ELASTICSEARCH_VERSION=5.3.2
+ARG OPENSEARCH_VERSION=3.0.0
 
 # Deploy PostgreSQL JDBC Driver
 RUN cd /kafka/libs && curl -sO https://jdbc.postgresql.org/download/postgresql-$POSTGRES_VERSION.jar
@@ -13,6 +15,11 @@ RUN cd /kafka/libs && curl -sO https://jdbc.postgresql.org/download/postgresql-$
 # Deploy Kafka Connect JDBC
 RUN mkdir $KAFKA_CONNECT_JDBC_DIR && cd $KAFKA_CONNECT_JDBC_DIR &&\
 	curl -sO https://packages.confluent.io/maven/io/confluent/kafka-connect-jdbc/$KAFKA_JDBC_VERSION/kafka-connect-jdbc-$KAFKA_JDBC_VERSION.jar
+
+# Deploy OpenSearch sink connector
+RUN mkdir $KAFKA_CONNECT_OS_DIR && cd $KAFKA_CONNECT_OS_DIR &&\
+        curl -sLO https://github.com/aiven/opensearch-connector-for-apache-kafka/releases/download/v3.0.0/opensearch-connector-for-apache-kafka-3.0.0.zip &&\
+        unzip opensearch-connector-for-apache-kafka-3.0.0.zip
 
 # Deploy Confluent Elasticsearch sink connector
 RUN mkdir $KAFKA_CONNECT_ES_DIR && cd $KAFKA_CONNECT_ES_DIR &&\
