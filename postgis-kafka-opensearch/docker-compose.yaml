@@ -58,8 +58,6 @@ services:
     ports:
       - 9200:9200
       - 9600:9600 # required for Performance Analyzer
-    env_file:
-      - .env
 
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:latest
