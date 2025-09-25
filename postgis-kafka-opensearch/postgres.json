@@ -7,7 +7,7 @@
     "database.user": "postgresuser",
     "database.password": "postgrespw",
     "database.dbname" : "inventory",
-    "table.include.list": "public.customers,public.cities",
+    "table.include.list": "public.customers,public.cities,public.people",
     "topic.prefix": "pg"
   }
 }

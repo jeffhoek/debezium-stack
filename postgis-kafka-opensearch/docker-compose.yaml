@@ -2,7 +2,7 @@
 version: '3'
 services:
   zookeeper:
-    image: quay.io/debezium/zookeeper:2.2
+    image: quay.io/debezium/zookeeper:3.2
     hostname: zookeeper
     container_name: zookeeper
     ports:
@@ -11,11 +11,9 @@ services:
       - 3888:3888
 
   kafka:
-    image: quay.io/debezium/kafka:2.2
+    image: quay.io/debezium/kafka:3.2
     ports:
       - 9092:9092
-    links:
-      - zookeeper
     environment:
      - ZOOKEEPER_CONNECT=zookeeper:2181
     depends_on:
@@ -40,6 +38,7 @@ services:
     image: opensearchproject/opensearch:latest
     container_name: opensearch-node1
     environment:
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_ADMIN_PASSWORD}
       - cluster.name=opensearch-cluster
       - node.name=opensearch-node1
       - discovery.seed_hosts=opensearch-node1
@@ -59,6 +58,8 @@ services:
     ports:
       - 9200:9200
       - 9600:9600 # required for Performance Analyzer
+    env_file:
+      - .env
 
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:latest
@@ -75,15 +76,10 @@ services:
     build:
       context: ./containers/connect
       args:
-        DEBEZIUM_VERSION: 2.2
-    # image: jeffhoek/connect-jdbc-es-opensearch:2.2
+        DEBEZIUM_VERSION: 3.2.2.Final
     ports:
      - 8083:8083
      - 5005:5005
-    links:
-     - kafka
-     - postgres
-     - opensearch-node1
     environment:
      - BOOTSTRAP_SERVERS=kafka:9092
      - GROUP_ID=1

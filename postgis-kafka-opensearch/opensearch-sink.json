@@ -3,7 +3,7 @@
     "config": {
         "name":"opensearch-connector",
         "connector.class": "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector",
-        "topics": "pg.public.cities",
+        "topics": "pg.public.people",
         "connection.url": "http://opensearch-node1:9200",
         "transforms": "unwrap,key",
         "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
