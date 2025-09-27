@@ -3,8 +3,9 @@
     "config": {
         "name":"opensearch-connector",
         "connector.class": "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector",
-        "topics": "pg.public.cities",
+        "topics": "pg.public.people,pg.public.cities",
         "connection.url": "http://opensearch-node1:9200",
+        "consumer.auto.offset.reset": "earliest",
         "transforms": "unwrap,key",
         "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
         "transforms.unwrap.drop.tombstones": "false",
@@ -12,7 +13,7 @@
         "transforms.key.field": "id",
         "type.name": "city",
         "tasks.max":"1",
-        "key.ignore": "false",
+        "key.ignore": "true",
         "behavior.on.null.values": "delete"
     }
 }
